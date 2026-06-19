@@ -1,4 +1,5 @@
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+// Empty string = relative URLs (used when frontend is served from the backend in production)
+const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:4000';
 
 export interface RoomData {
   id: string;

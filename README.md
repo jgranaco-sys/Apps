@@ -202,6 +202,41 @@ npm run preview    # Preview production build
 
 ---
 
+## Deploying to the Internet
+
+The app can be deployed as a single service — the Express backend serves both the API and the pre-built React frontend.
+
+### Option A — Render.com (recommended, easiest)
+
+1. Push this repo to GitHub (it's already there if you're reading this).
+2. Go to [https://dashboard.render.com](https://dashboard.render.com) → **New** → **Blueprint**.
+3. Connect your GitHub repo — Render will find the `render.yaml` file automatically.
+4. Click **Apply**. Render will build and deploy the app (~3–5 minutes).
+5. Once deployed, copy your service URL (e.g. `https://score-room.onrender.com`).
+6. In the Render dashboard go to your service → **Environment** and set:
+   - `FRONTEND_URL` → your Render service URL (e.g. `https://score-room.onrender.com`)
+7. Trigger a redeploy — your app is now live!
+
+> **Persistence**: the `render.yaml` includes a 1 GB persistent disk (~$1/month) so the SQLite database survives restarts. Remove the `disk:` section to stay on the free tier, but room data will reset whenever the service restarts.
+
+### Option B — Docker (any cloud or VPS)
+
+```bash
+# Build the image
+docker build -t score-room .
+
+# Run it (mounts a local ./data directory for the SQLite database)
+docker run -d \
+  -p 4000:4000 \
+  -v "$(pwd)/data:/data" \
+  -e FRONTEND_URL=https://your-domain.com \
+  score-room
+```
+
+Then point your domain / reverse-proxy at port 4000.
+
+---
+
 ## License
 
 MIT

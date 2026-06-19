@@ -12,7 +12,11 @@ async function main() {
 
   const io = new SocketServer(httpServer, {
     cors: {
-      origin: [FRONTEND_URL, 'http://localhost:5173', 'http://localhost:3000'],
+      // In production, frontend is served from the same origin so no CORS is needed for sockets.
+      // In development, allow localhost origins.
+      origin: process.env.NODE_ENV === 'production'
+        ? [FRONTEND_URL]
+        : [FRONTEND_URL, 'http://localhost:5173', 'http://localhost:3000'],
       methods: ['GET', 'POST'],
       credentials: true,
     },

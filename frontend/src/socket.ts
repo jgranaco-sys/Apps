@@ -1,12 +1,14 @@
 import { io, Socket } from 'socket.io-client';
 
-const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 'http://localhost:4000';
+// When VITE_SOCKET_URL is not set (production), connect to the current page's origin
+const SOCKET_URL = import.meta.env.VITE_SOCKET_URL ?? 'http://localhost:4000';
 
 let socket: Socket | null = null;
 
 export function getSocket(): Socket {
   if (!socket) {
-    socket = io(SOCKET_URL, {
+    const url = SOCKET_URL || window.location.origin;
+    socket = io(url, {
       autoConnect: false,
       transports: ['websocket', 'polling'],
     });

@@ -1,5 +1,6 @@
 import express from 'express';
 import cors from 'cors';
+import path from 'path';
 import { Server as SocketServer } from 'socket.io';
 import { createRoomsRouter } from './modules/rooms/rooms.router';
 
@@ -23,6 +24,15 @@ export function createApp(io: SocketServer) {
 
   // Routes
   app.use('/api/rooms', createRoomsRouter(io));
+
+  // In production, serve the built React frontend and handle client-side routing
+  if (process.env.NODE_ENV === 'production') {
+    const publicPath = path.join(__dirname, '..', 'public');
+    app.use(express.static(publicPath));
+    app.get('*', (_req, res) => {
+      res.sendFile(path.join(publicPath, 'index.html'));
+    });
+  }
 
   return app;
 }
