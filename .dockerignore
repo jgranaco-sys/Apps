@@ -1,0 +1,8 @@
+.git
+**/node_modules
+**/dist
+**/.env
+frontend/.env
+backend/.env
+backend/dev.db
+backend/dev.db-journal

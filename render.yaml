@@ -1,0 +1,43 @@
+# render.yaml — Render.com deployment configuration
+# Docs: https://render.com/docs/blueprint-spec
+#
+# How to deploy:
+#  1. Push this repo to GitHub.
+#  2. Go to https://dashboard.render.com → New → Blueprint.
+#  3. Connect your repo — Render will detect this file automatically.
+#  4. After the first deploy, copy your service URL (e.g. https://score-room.onrender.com)
+#     and set it as the FRONTEND_URL environment variable in the Render dashboard.
+
+services:
+  - type: web
+    name: score-room
+    runtime: node
+    # Build: compile frontend then backend, copy frontend output into backend/public
+    buildCommand: >
+      cd frontend && npm ci && npm run build &&
+      cd ../backend && mkdir -p public && cp -r ../frontend/dist/. public/ &&
+      npm ci && npx prisma generate && npm run build
+    startCommand: cd backend && npx prisma db push && node dist/server.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      # Set DATABASE_URL to the disk mount path so data persists across deploys.
+      # If you remove the disk section below, change this to "file:./dev.db"
+      # (data will reset on every deploy).
+      - key: DATABASE_URL
+        value: file:/data/prod.db
+      # IMPORTANT: After your first deploy, replace the placeholder below with
+      # your actual Render service URL (e.g. https://score-room.onrender.com).
+      # This allows Socket.IO to accept connections from your frontend.
+      - key: FRONTEND_URL
+        value: https://score-room.onrender.com   # ← update with your real URL
+
+  # Persistent 1 GB disk to keep the SQLite database across deploys.
+  # Render charges ~$1/month for this disk. Remove this section to use
+  # the free tier (data will not survive restarts/redeploys).
+    disk:
+      name: score-room-data
+      mountPath: /data
+      sizeGB: 1

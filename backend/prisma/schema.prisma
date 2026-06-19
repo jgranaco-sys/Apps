@@ -1,0 +1,52 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Room {
+  id                    String   @id @default(uuid())
+  code                  String   @unique
+  adminUserId           String
+  status                String   @default("WAITING") // WAITING | REVEAL_OPEN | FINISHED
+  maxLocalScore         Int
+  maxVisitScore         Int
+  allowDuplicates       Boolean  @default(false)
+  maxRepetitionsPerScore Int     @default(1)
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  users       User[]
+  assignments Assignment[]
+}
+
+model User {
+  id        String   @id @default(uuid())
+  roomId    String
+  nickname  String
+  isAdmin   Boolean  @default(false)
+  joinedAt  DateTime @default(now())
+
+  room       Room        @relation(fields: [roomId], references: [id])
+  assignment Assignment?
+}
+
+model Assignment {
+  id          String    @id @default(uuid())
+  roomId      String
+  userId      String    @unique
+  localScore  Int
+  visitScore  Int
+  revealed    Boolean   @default(false)
+  revealedAt  DateTime?
+  createdAt   DateTime  @default(now())
+
+  room Room @relation(fields: [roomId], references: [id])
+  user User @relation(fields: [userId], references: [id])
+}
